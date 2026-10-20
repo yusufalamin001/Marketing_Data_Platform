@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: stg_snapchat_ads_ads
+    description: Cleaned Snapchat ads. Grain is one row per ad. Links each ad to its ad group.
+    columns:
+      - name: ad_id
+        description: Snapchat ad identifier. Primary key.
+        data_tests: [not_null, unique]
+      - name: ad_group_id
+        description: Ad group the ad belongs to.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_snapchat_ads_adgroups')
+                field: ad_group_id
+              config:
+                severity: warn
+      - name: ad_name
+        description: Ad name as set in Snapchat.
+      - name: ad_updated_at
+        description: When the ad record last changed. Renamed to match Facebook.
