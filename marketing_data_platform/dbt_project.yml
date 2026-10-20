@@ -21,10 +21,16 @@ models:
     staging:
       +materialized: view
 
-    # Intermediate: reusable joins and the union of both platforms.
-    # Kept as views while data is small, so they can be queried and tested.
     intermediate:
-      +materialized: view
+      # Per-platform joins feed exactly one model (int_marketing_ads), so
+      # nothing needs to be stored. Ephemeral inlines them as CTEs.
+      facebook:
+        +materialized: ephemeral
+      snapchat:
+        +materialized: ephemeral
+      # The unified model is queried and tested directly, so it is a view.
+      marketing:
+        +materialized: view
 
     # Marts: what analysts, BI tools and the AI agent query repeatedly.
     # Stored as tables so queries are fast and do not recompute joins.
