@@ -1,0 +1,35 @@
+version: 2
+models:
+  - name: int_facebook_ads_enriched
+    description: >
+      Facebook daily ad performance joined to its ad, ad group, campaign and
+      account. Grain: one row per ad per day, the same as stg_facebook_ads_stats.
+      Currency comes from the account. Ephemeral, so it creates no table or view
+      and is inlined into int_marketing_ads.
+    columns:
+      - name: platform
+        description: Constant value facebook.
+      - name: report_date
+        description: Calendar day the performance applies to.
+      - name: account_id
+        description: Facebook ad account that owns the ad.
+      - name: currency_code
+        description: Currency of the owning account, which is how the spend is denominated.
+      - name: campaign_id
+        description: Campaign the ad belongs to.
+      - name: campaign_name
+        description: Campaign name as set in Facebook.
+      - name: ad_group_id
+        description: Ad group (ad set) the ad belongs to.
+      - name: ad_group_name
+        description: Ad group name as set in Facebook.
+      - name: ad_id
+        description: Facebook ad identifier.
+      - name: ad_name
+        description: Ad name as set in Facebook.
+      - name: spend
+        description: Amount spent that day in currency_code, widened to 6 decimals to match Snapchat.
+      - name: impressions
+        description: Times the ad was shown. Null when the source has no value.
+      - name: clicks
+        description: Clicks recorded. Null when the source has no value.

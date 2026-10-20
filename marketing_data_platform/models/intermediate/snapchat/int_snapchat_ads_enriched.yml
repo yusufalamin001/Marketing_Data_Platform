@@ -1,0 +1,36 @@
+version: 2
+models:
+  - name: int_snapchat_ads_enriched
+    description: >
+      Snapchat daily ad performance with country rows summed, then joined to its
+      ad, ad group and campaign. Grain: one row per ad per day, matching
+      Facebook. Country is dropped here because Facebook has no equivalent.
+      Ephemeral, so it creates no table or view and is inlined into
+      int_marketing_ads.
+    columns:
+      - name: platform
+        description: Constant value snapchat.
+      - name: report_date
+        description: Calendar day the performance applies to.
+      - name: account_id
+        description: Snapchat ad account, taken from the campaign.
+      - name: currency_code
+        description: Currency supplied by Snapchat in the stats table.
+      - name: campaign_id
+        description: Campaign the ad group belongs to.
+      - name: campaign_name
+        description: Campaign name as set in Snapchat.
+      - name: ad_group_id
+        description: Ad group the ad belongs to.
+      - name: ad_group_name
+        description: Ad group name in its latest version.
+      - name: ad_id
+        description: Snapchat ad identifier.
+      - name: ad_name
+        description: Ad name as set in Snapchat.
+      - name: spend
+        description: Spend summed across countries, in currency_code, to 6 decimals.
+      - name: impressions
+        description: Impressions summed across countries. Null only if every country row is null.
+      - name: clicks
+        description: Clicks summed across countries. Null only if every country row is null.
