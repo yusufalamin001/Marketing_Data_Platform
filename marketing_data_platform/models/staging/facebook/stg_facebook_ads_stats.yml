@@ -1,0 +1,39 @@
+version: 2
+models:
+  - name: stg_facebook_ads_stats
+    description: >
+      Cleaned Facebook daily ad performance. Grain: one row per ad per day.
+      Types standardised and columns renamed to the unified naming used
+      across platforms. No business logic applied.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ad_id, report_date]
+    columns:
+      - name: ad_id
+        description: Facebook ad identifier, as a string.
+        data_tests: [not_null]
+      - name: account_id
+        description: Owning ad account, as a string. Used later to find the currency.
+        data_tests: [not_null]
+      - name: report_date
+        description: Calendar day the performance applies to.
+        data_tests: [not_null]
+      - name: spend
+        description: Amount spent that day, in the account's currency (not in this table).
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: impressions
+        description: Times the ad was shown. Null when the source has no value.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: clicks
+        description: Clicks recorded. Null when the source has no value.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
