@@ -1,0 +1,115 @@
+sources:
+  - name: facebook_ads
+    database: bronze_production
+    schema: facebook_ads
+    description: Raw data from the Facebook Ads platform (static historical extract).
+    config:
+      enabled: true
+      meta:
+        owner: "@alamin"
+      freshness:
+        warn_after:
+          count: 2
+          period: day
+
+    tables:
+      - name: campaigns
+        description: Campaign data from the Facebook Ads platform (static).
+        config:
+          enabled: true
+          event_time: campaign_updated_at
+        columns:
+          - name: campaign_id
+            description: Facebook campaign identifier.
+            data_tests:
+              - not_null
+              - unique
+          - name: campaign_name
+            description: Campaign name as set in Facebook.
+          - name: campaign_updated_at
+            description: When the campaign record last changed.
+
+      - name: adgroups
+        description: Ad group (ad set) data from the Facebook Ads platform (static).
+        config:
+          enabled: true
+          event_time: ad_group_updated_at
+        columns:
+          - name: ad_group_id
+            description: Facebook ad group identifier.
+            data_tests:
+              - not_null
+              - unique
+          - name: ad_group_name
+            description: Ad group name as set in Facebook.
+          - name: ad_group_updated_at
+            description: When the ad group record last changed.
+
+      - name: ads
+        description: Ad data from the Facebook Ads platform (static). Links each ad to its campaign, ad group and account.
+        config:
+          enabled: true
+          event_time: ad_updated_at
+        columns:
+          - name: ad_id
+            description: Facebook ad identifier.
+            data_tests:
+              - not_null
+              - unique
+          - name: campaign_id
+            description: Campaign the ad belongs to.
+          - name: ad_group_id
+            description: Ad group the ad belongs to.
+          - name: account_id
+            description: Account the ad belongs to.
+          - name: ad_name
+            description: Ad name as set in Facebook.
+          - name: ad_status
+            description: Ad status, for example ACTIVE, PAUSED or ARCHIVED.
+          - name: ad_updated_at
+            description: When the ad record last changed.
+
+      - name: accounts
+        description: Ad account data from the Facebook Ads platform (static). Source of the currency for each account.
+        config:
+          enabled: true
+          event_time: account_updated_at
+        columns:
+          - name: account_id
+            description: Facebook ad account identifier.
+            data_tests:
+              - not_null
+              - unique
+          - name: account_name
+            description: Display name of the account.
+          - name: ad_currency_code
+            description: ISO currency code the account spends in.
+          - name: account_created_at
+            description: When the account was created.
+          - name: account_updated_at
+            description: When the account record last changed.
+
+      - name: ads_stats
+        description: Daily spend, impressions and clicks per ad from the Facebook Ads platform (static). Has no currency column.
+        config:
+          enabled: true
+          event_time: ad_date
+        columns:
+          - name: ad_id
+            description: Facebook ad identifier.
+            data_tests:
+              - not_null
+          - name: account_id
+            description: Account that owns the ad.
+            data_tests:
+              - not_null
+          - name: ad_spend
+            description: Amount spent that day, in the account's currency.
+          - name: ad_impressions
+            description: Times the ad was shown that day. Can be null.
+          - name: ad_clicks
+            description: Clicks that day. Can be null.
+          - name: ad_date
+            description: Calendar date the performance applies to.
+            data_tests:
+              - not_null

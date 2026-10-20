@@ -1,0 +1,33 @@
+name: 'marketing_data_platform'
+version: '1.0.0'
+
+profile: 'marketing_data_platform'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  marketing_data_platform:
+    # Staging: one model per raw table, light cleaning only.
+    # Views are cheap, always read fresh raw data and store nothing extra.
+    staging:
+      +materialized: view
+
+    # Intermediate: reusable joins and the union of both platforms.
+    # Kept as views while data is small, so they can be queried and tested.
+    intermediate:
+      +materialized: view
+
+    # Marts: what analysts, BI tools and the AI agent query repeatedly.
+    # Stored as tables so queries are fast and do not recompute joins.
+    # The incremental fact model overrides this in its own file.
+    marts:
+      +materialized: table
