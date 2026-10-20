@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: stg_facebook_ads_adgroups
+    description: >
+      Cleaned Facebook ad groups (called ad sets in the Facebook interface).
+      Grain: one row per ad group.
+    columns:
+      - name: ad_group_id
+        description: Facebook ad group identifier. Primary key.
+        data_tests: [not_null, unique]
+      - name: ad_group_name
+        description: Ad group name as set in Facebook.
+      - name: ad_group_updated_at
+        description: When the ad group record last changed.

@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: stg_facebook_ads_campaigns
+    description: >
+      Cleaned Facebook campaigns. Grain: one row per campaign.
+    columns:
+      - name: campaign_id
+        description: Facebook campaign identifier. Primary key.
+        data_tests: [not_null, unique]
+      - name: campaign_name
+        description: Campaign name as set in Facebook.
+      - name: campaign_updated_at
+        description: When the campaign record last changed.

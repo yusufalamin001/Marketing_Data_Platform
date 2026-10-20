@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: stg_facebook_ads_ads
+    description: >
+      Cleaned Facebook ads. Grain: one row per ad. Links each ad to its
+      campaign, ad group and account. IDs are strings to match other platforms.
+    columns:
+      - name: ad_id
+        description: Facebook ad identifier. Primary key.
+        data_tests: [not_null, unique]
+      - name: campaign_id
+        description: Campaign the ad belongs to.
+        data_tests: [not_null]
+      - name: ad_group_id
+        description: Ad group the ad belongs to.
+        data_tests: [not_null]
+      - name: account_id
+        description: Account that owns the ad.
+        data_tests: [not_null]
+      - name: ad_name
+        description: Ad name as set in Facebook.
+      - name: ad_status
+        description: Current ad status.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['ACTIVE', 'PAUSED', 'ARCHIVED', 'DELETED']
+      - name: ad_updated_at
+        description: When the ad record last changed.

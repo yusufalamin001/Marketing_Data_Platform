@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: stg_facebook_ads_accounts
+    description: >
+      Cleaned Facebook ad accounts. Grain: one row per account. This is the
+      only place Facebook currency is recorded, so spend must be read with it.
+    columns:
+      - name: account_id
+        description: Facebook ad account identifier. Primary key.
+        data_tests: [not_null, unique]
+      - name: account_name
+        description: Display name of the account.
+      - name: currency_code
+        description: ISO currency code the account spends in. Renamed from ad_currency_code.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['EUR', 'USD']
+      - name: account_created_at
+        description: When the account was created.
+      - name: account_updated_at
+        description: When the account record last changed.
