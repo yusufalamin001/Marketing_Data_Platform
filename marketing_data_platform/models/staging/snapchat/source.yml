@@ -1,0 +1,91 @@
+sources:
+  - name: snapchat_ads
+    database: bronze_production
+    schema: snapchat_ads
+    description: Raw data from the Snapchat Ads platform (static historical extract).
+    config:
+      enabled: true
+      meta:
+        owner: "alamin"
+      freshness:
+        warn_after:
+          count: 2
+          period: day
+
+    tables:
+      - name: ads_stats
+        description: >
+          Daily spend, impressions and clicks per ad and country from the
+          Snapchat Ads platform (static). Currency is included in the table.
+        config:
+          enabled: true
+          event_time: ad_date
+        columns:
+          - name: ad_detail_id
+            description: Snapchat ad identifier (UUID). Joins to ads.ad_id.
+            data_tests: [not_null]
+          - name: ad_currency_code
+            description: ISO currency code of the spend.
+          - name: ad_country
+            description: Lower-case country code the performance applies to.
+          - name: ad_spend
+            description: Amount spent that day for that country, in ad_currency_code.
+          - name: ad_impressions
+            description: Times the ad was shown.
+          - name: ad_clicks
+            description: Clicks recorded. Stored as text, with missing values as the text null.
+          - name: ad_date
+            description: Calendar date the performance applies to.
+            data_tests: [not_null]
+          - name: data_src
+            description: Origin label from the loader. Always snapchat_ads here.
+
+      - name: ads
+        description: Ad data from the Snapchat Ads platform (static). Links each ad to its ad group.
+        config:
+          enabled: true
+          event_time: ad_detail_updated_at
+        columns:
+          - name: ad_id
+            description: Snapchat ad identifier (UUID).
+            data_tests: [not_null, unique]
+          - name: ad_group_id
+            description: Ad group the ad belongs to.
+          - name: ad_name
+            description: Ad name as set in Snapchat.
+          - name: ad_detail_updated_at
+            description: When the ad record last changed.
+
+      - name: adgroups
+        description: >
+          Ad group history from the Snapchat Ads platform (static). Keeps
+          older versions, so an ad group can appear more than once.
+        config:
+          enabled: true
+          event_time: ad_group_updated_at
+        columns:
+          - name: _surrogate_key
+            description: Hash that identifies one version of one ad group.
+            data_tests: [not_null, unique]
+          - name: ad_group_id
+            description: Snapchat ad group identifier. Not unique because of history.
+            data_tests: [not_null]
+          - name: campaign_id
+            description: Campaign the ad group belongs to.
+          - name: ad_group_name
+            description: Ad group name as set in Snapchat.
+          - name: ad_group_updated_at
+            description: When this version of the ad group was recorded.
+
+      - name: campaigns
+        description: Campaign data from the Snapchat Ads platform (static). Links each campaign to its account.
+        config:
+          enabled: true
+        columns:
+          - name: campaign_id
+            description: Snapchat campaign identifier (UUID).
+            data_tests: [not_null, unique]
+          - name: account_id
+            description: Snapchat ad account that owns the campaign.
+          - name: campaign_name
+            description: Campaign name as set in Snapchat.

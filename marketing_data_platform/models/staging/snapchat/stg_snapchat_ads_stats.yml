@@ -1,0 +1,56 @@
+version: 2
+models:
+  - name: stg_snapchat_ads_stats
+    description: >
+      Cleaned Snapchat daily ad performance. Grain: one row per ad per day
+      per country. Finer than Facebook, which has no country, so it is
+      rolled up later. Column names follow the unified naming.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ad_id, report_date, country_code]
+    columns:
+      - name: ad_id
+        description: Snapchat ad identifier. Renamed from ad_detail_id.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_snapchat_ads_ads')
+                field: ad_id
+      - name: report_date
+        description: Calendar day the performance applies to.
+        data_tests: [not_null]
+      - name: country_code
+        description: Upper-case country code. A stray US row is expected and only warns.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['DE', 'CH', 'AT']
+              config:
+                severity: warn
+      - name: currency_code
+        description: ISO currency code of the spend, supplied by Snapchat in this table.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['EUR']
+      - name: spend
+        description: Amount spent, in currency_code. Kept to 6 decimals so nothing is rounded.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: impressions
+        description: Times the ad was shown.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: clicks
+        description: Clicks recorded. Null when the source has no value.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0

@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: stg_snapchat_ads_campaigns
+    description: Cleaned Snapchat campaigns. Grain is one row per campaign. Holds the account link.
+    columns:
+      - name: campaign_id
+        description: Snapchat campaign identifier. Primary key.
+        data_tests: [not_null, unique]
+      - name: account_id
+        description: Snapchat ad account that owns the campaign.
+        data_tests: [not_null]
+      - name: campaign_name
+        description: Campaign name as set in Snapchat.

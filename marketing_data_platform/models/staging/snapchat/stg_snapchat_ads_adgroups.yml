@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: stg_snapchat_ads_adgroups
+    description: >
+      Cleaned Snapchat ad groups. Grain is one row per ad group. The source
+      keeps history, so only the most recent version of each ad group is kept.
+    columns:
+      - name: ad_group_id
+        description: Snapchat ad group identifier. Primary key after deduplication.
+        data_tests: [not_null, unique]
+      - name: campaign_id
+        description: Campaign the ad group belongs to.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_snapchat_ads_campaigns')
+                field: campaign_id
+              config:
+                severity: warn
+      - name: ad_group_name
+        description: Ad group name in its latest version.
+      - name: ad_group_updated_at
+        description: When the kept version was recorded.
