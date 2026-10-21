@@ -1,6 +1,6 @@
 marketing_data_platform:
   target: "{{ env_var('DBT_TARGET', 'dev') }}"
-  
+
   meta:
     base: &base
       type: databricks
@@ -15,7 +15,9 @@ marketing_data_platform:
       retry_all: true
 
   outputs:
-    dev: &dev_service_account
+    # Local development. Acts as the developer, using a personal access token.
+    # Never used for anything automated.
+    dev: &dev_personal
       <<: *base
       host: dbc-9c464fce-09e0.cloud.databricks.com
       token: "{{ env_var('DATABRICKS_PAT_TOKEN') }}"
@@ -23,39 +25,48 @@ marketing_data_platform:
       schema: "{{ env_var('DEV_SCHEMA') }}"
       http_path: /sql/1.0/warehouses/911b191e1ab1578c
 
+    # Pull request validation. Acts as the service principal. DEV_SCHEMA is set
+    # per pull request in CI, so two pull requests never collide.
     ci: &ci_service_account
       <<: *base_auth
+      host: dbc-9c464fce-09e0.cloud.databricks.com
+      http_path: /sql/1.0/warehouses/911b191e1ab1578c
       catalog: ci_development
       schema: "{{ env_var('DEV_SCHEMA') }}"
+
+    # Dress rehearsal of production. Marts land in gold_staging, and the
+    # custom database macro sends staging and intermediate models to
+    # silver_staging.
+    staging: &staging_service_account
+      <<: *base_auth
       host: dbc-9c464fce-09e0.cloud.databricks.com
       http_path: /sql/1.0/warehouses/911b191e1ab1578c
-
-    staging: &staging_service_account
-      <<: *ci_service_account
       catalog: gold_staging
       schema: analytics
-      http_path: /sql/1.0/warehouses/911b191e1ab1578c
 
+    # What consumers read. Marts land in gold_production, and the custom
+    # database macro sends staging and intermediate models to silver_production.
     production: &production_service_account
       <<: *base_auth
-      catalog: gold_production
-      schema: analytics
       host: dbc-9c464fce-09e0.cloud.databricks.com
       http_path: /sql/1.0/warehouses/911b191e1ab1578c
+      catalog: gold_production
+      schema: analytics
 
-      
+
 ## DATABRICKS ##
 ## By default, edr expects the profile name 'elementary'.      ##
 ## Configure the database and schema of elementary models.     ##
 ## Check where 'elementary_test_results' is to find it.        ##
+## Used by the edr command line tool only. Pass --profile-target.
 
 elementary:
   outputs:
     dev:
-      <<: *dev_service_account
+      <<: *dev_personal
       catalog: "{{ env_var('DEV_CATALOG') }}"
       schema: "{{ env_var('DEV_SCHEMA') }}_elementary"
-    
+
     production:
       <<: *production_service_account
       catalog: silver_production

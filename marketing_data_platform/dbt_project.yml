@@ -29,10 +29,14 @@ models:
 
     # Staging: one model per raw table, light cleaning only.
     # Views are cheap, always read fresh raw data and store nothing extra.
+    # In staging and production these land in the silver catalog. In dev and CI
+    # the custom database macro ignores the tag and uses the target's catalog.
     staging:
       +materialized: view
+      +database: silver
 
     intermediate:
+      +database: silver
       # Per-platform joins feed exactly one model (int_marketing_ads), so
       # nothing needs to be stored. Ephemeral inlines them as CTEs.
       facebook:
@@ -44,6 +48,8 @@ models:
         +materialized: view
 
     # Marts: what analysts, BI tools and the AI agent query.
+    # No +database here, so they use the target's own catalog, which is gold
+    # in staging and production.
     marts:
       # Facts grow daily. The strategy (merge) and unique key are set in the
       # model itself because they are specific to that model.
@@ -57,7 +63,10 @@ models:
       reporting:
         +materialized: view
 
-  # Elementary observability package. Its tables go to a separate schema,
-  # <target schema>_elementary, so monitoring data never mixes with models.
+  # Elementary observability package. Its tables go to a separate schema:
+  # <target schema>_elementary in dev and CI, and exactly "elementary" in
+  # staging and production. Kept in the silver catalog with the other
+  # working models.
   elementary:
     +schema: elementary
+    +database: silver
