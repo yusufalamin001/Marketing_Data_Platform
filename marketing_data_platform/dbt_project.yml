@@ -21,6 +21,9 @@ vars:
 
 models:
   marketing_data_platform:
+    +persist_docs:
+      relation: true
+      columns: true
     # Staging: one model per raw table, light cleaning only.
     # Views are cheap, always read fresh raw data and store nothing extra.
     staging:

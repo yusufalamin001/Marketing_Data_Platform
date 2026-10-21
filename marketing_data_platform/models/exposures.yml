@@ -1,0 +1,29 @@
+version: 2
+exposures:
+  - name: marketing_genie_space
+    label: Marketing Performance Genie space
+    type: application
+    maturity: low
+    description: >
+      Databricks Genie space over mart_marketing_performance. Tested with three
+      natural-language questions (Facebook spend in December 2025, campaign with
+      the most clicks, Facebook versus Snapchat spend). All three answers were
+      checked against figures recomputed from the raw files and matched.
+      Instructions tell the agent to group spend by currency, treat null clicks
+      as unknown, and recompute ratios from sums.
+    depends_on:
+      - ref('mart_marketing_performance')
+    owner:
+      name: Alamin
+
+  - name: marketing_bi_dashboard
+    label: Marketing Performance Dashboard
+    type: dashboard
+    maturity: low
+    description: >
+      Planned consumer. A BI dashboard of spend, impressions, clicks and cost
+      metrics by platform, campaign and day.
+    depends_on:
+      - ref('mart_marketing_performance')
+    owner:
+      name: Alamin
