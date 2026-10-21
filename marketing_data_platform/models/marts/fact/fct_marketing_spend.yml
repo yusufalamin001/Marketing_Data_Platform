@@ -1,0 +1,101 @@
+version: 2
+models:
+  - name: fct_marketing_spend
+    description: >
+      Daily advertising performance for Facebook and Snapchat. Grain: one row
+      per platform per ad per day. Holds keys and metrics only. Names live in
+      dim_campaign and dim_ad. Spend is in currency_code and must never be
+      summed across currencies. Built incrementally with a merge on
+      marketing_spend_key and a per-platform lookback window, so restated
+      numbers overwrite the old row.
+    columns:
+      - name: marketing_spend_key
+        description: Surrogate key. Hash of platform, ad id and report date. Primary key.
+        data_tests: [not_null, unique]
+      - name: platform
+        description: Advertising platform the row came from.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['facebook', 'snapchat']
+      - name: report_date
+        description: Calendar day the performance applies to.
+        data_tests: [not_null]
+      - name: account_id
+        description: Ad account that owns the campaign.
+        data_tests: [not_null]
+      - name: currency_code
+        description: ISO currency the spend is denominated in. Group by this before summing spend.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['EUR', 'USD']
+      - name: campaign_key
+        description: Foreign key to dim_campaign.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_campaign')
+                field: campaign_key
+      - name: ad_key
+        description: Foreign key to dim_ad.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_ad')
+                field: ad_key
+      - name: spend
+        description: Amount spent that day, in currency_code.
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: impressions
+        description: Times the ad was shown. Null when the source has no value.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: clicks
+        description: Clicks recorded. Null when the source has no value, which means unknown and not zero.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: ctr
+        description: >
+          Click-through rate for this row, clicks divided by impressions. Null
+          when impressions is zero or either value is missing. Do not average
+          this column. To aggregate, divide summed clicks by summed impressions.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+              config:
+                severity: warn
+      - name: cpc
+        description: >
+          Cost per click for this row, spend divided by clicks. Null when clicks
+          is zero or missing. Do not average. To aggregate, divide summed spend
+          by summed clicks within one currency.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: cpm
+        description: >
+          Cost per 1,000 impressions for this row, spend divided by impressions
+          times 1,000. Null when impressions is zero or missing. Do not average.
+          To aggregate, use summed spend and summed impressions within one currency.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: dbt_updated_at
+        description: When dbt last wrote this row. Shows which rows an incremental run touched.

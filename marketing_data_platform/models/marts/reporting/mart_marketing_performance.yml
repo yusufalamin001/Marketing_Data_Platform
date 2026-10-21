@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: mart_marketing_performance
+    description: >
+      The model to query for advertising performance. One row per platform per
+      ad per day, with campaign, ad group and ad names already attached. Covers
+      Facebook and Snapchat. Spend is in currency_code, so group by currency
+      before adding spend across rows. Ratio columns are per row. For totals,
+      recompute them from summed spend, clicks and impressions.
+    columns:
+      - name: marketing_spend_key
+        description: Unique key for the row.
+        data_tests: [not_null, unique]
+      - name: platform
+        description: Advertising platform, either facebook or snapchat.
+      - name: report_date
+        description: Calendar day the performance applies to.
+      - name: account_id
+        description: Ad account that owns the campaign.
+      - name: currency_code
+        description: Currency of the spend, EUR or USD. Never add spend across different currencies.
+      - name: campaign_id
+        description: Campaign identifier in the source platform.
+      - name: campaign_name
+        description: Current campaign name.
+        data_tests: [not_null]
+      - name: ad_group_id
+        description: Ad group (Facebook ad set) identifier.
+      - name: ad_group_name
+        description: Current ad group name.
+      - name: ad_id
+        description: Ad identifier in the source platform.
+      - name: ad_name
+        description: Current ad name.
+        data_tests: [not_null]
+      - name: ad_status
+        description: Ad status. Facebook only, null for Snapchat.
+      - name: spend
+        description: Amount spent that day, in currency_code.
+      - name: impressions
+        description: Times the ad was shown. Null when unknown.
+      - name: clicks
+        description: Clicks recorded. Null when unknown, which is not the same as zero.
+      - name: ctr
+        description: Clicks divided by impressions for this row. Null when impressions is zero or unknown. Do not average.
+      - name: cpc
+        description: Spend divided by clicks for this row. Null when clicks is zero or unknown. Do not average.
+      - name: cpm
+        description: Spend divided by impressions times 1,000 for this row. Null when impressions is zero or unknown. Do not average.
