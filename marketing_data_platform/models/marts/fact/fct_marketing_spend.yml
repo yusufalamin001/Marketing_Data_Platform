@@ -8,6 +8,8 @@ models:
       summed across currencies. Built incrementally with a merge on
       marketing_spend_key and a per-platform lookback window, so restated
       numbers overwrite the old row.
+    data_tests:
+      - elementary.schema_changes
     columns:
       - name: marketing_spend_key
         description: Surrogate key. Hash of platform, ad id and report date. Primary key.

@@ -21,9 +21,12 @@ vars:
 
 models:
   marketing_data_platform:
+    # Store model and column descriptions as comments in Unity Catalog, so
+    # consumers such as Genie can read them from the tables themselves.
     +persist_docs:
       relation: true
       columns: true
+
     # Staging: one model per raw table, light cleaning only.
     # Views are cheap, always read fresh raw data and store nothing extra.
     staging:
@@ -53,3 +56,8 @@ models:
       # never serve stale names.
       reporting:
         +materialized: view
+
+  # Elementary observability package. Its tables go to a separate schema,
+  # <target schema>_elementary, so monitoring data never mixes with models.
+  elementary:
+    +schema: elementary
