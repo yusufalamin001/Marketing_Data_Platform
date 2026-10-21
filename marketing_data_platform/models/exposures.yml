@@ -1,16 +1,17 @@
 version: 2
 exposures:
   - name: marketing_genie_space
-    label: Marketing Performance Genie space
+    label: Marketing Performance Genie Space
     type: application
     maturity: low
     description: >
-      Databricks Genie space over mart_marketing_performance. Tested with three
-      natural-language questions (Facebook spend in December 2025, campaign with
-      the most clicks, Facebook versus Snapchat spend). All three answers were
-      checked against figures recomputed from the raw files and matched.
-      Instructions tell the agent to group spend by currency, treat null clicks
-      as unknown, and recompute ratios from sums.
+      Built and tested. A Databricks Genie space over mart_marketing_performance.
+      Tested with three natural-language questions (Facebook spend in December 2025,
+      campaign with the most clicks, Facebook versus Snapchat spend). All figures
+      matched values recomputed from the raw files. Instructions tell the agent to
+      group spend by currency, treat null clicks as unknown, and recompute ratios
+      from sums. Known limitation: the wording of cross-platform comparisons is
+      looser than the numbers behind it. Evidence is in docs/evidence/genie.
     depends_on:
       - ref('mart_marketing_performance')
     owner:
@@ -21,8 +22,8 @@ exposures:
     type: dashboard
     maturity: low
     description: >
-      Planned consumer. A BI dashboard of spend, impressions, clicks and cost
-      metrics by platform, campaign and day.
+      Planned, not yet built. A BI dashboard of spend, impressions, clicks and cost
+      metrics by platform, campaign and day, reading from mart_marketing_performance.
     depends_on:
       - ref('mart_marketing_performance')
     owner:
