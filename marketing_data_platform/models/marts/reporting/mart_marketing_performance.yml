@@ -8,6 +8,8 @@ models:
       Facebook and Snapchat. Spend is in currency_code, so group by currency
       before adding spend across rows. Ratio columns are per row. For totals,
       recompute them from summed spend, clicks and impressions.
+    data_tests:
+      - elementary.schema_changes
     columns:
       - name: marketing_spend_key
         description: Unique key for the row.

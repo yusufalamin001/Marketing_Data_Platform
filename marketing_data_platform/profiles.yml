@@ -51,6 +51,11 @@ marketing_data_platform:
 
 elementary:
   outputs:
+    dev:
+      <<: *dev_service_account
+      catalog: "{{ env_var('DEV_CATALOG') }}"
+      schema: "{{ env_var('DEV_SCHEMA') }}_elementary"
+    
     production:
       <<: *production_service_account
       catalog: silver_production
