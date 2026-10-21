@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: dim_campaign
+    description: >
+      One row per platform per campaign, with its current name. Rebuilt in full
+      on every run so names are always current.
+    columns:
+      - name: campaign_key
+        description: Surrogate key. Hash of platform and campaign id. Primary key.
+        data_tests: [not_null, unique]
+      - name: platform
+        description: Advertising platform that owns the campaign.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['facebook', 'snapchat']
+      - name: campaign_id
+        description: Campaign identifier in the source platform, as a string.
+        data_tests: [not_null]
+      - name: campaign_name
+        description: Campaign name as currently set in the platform.

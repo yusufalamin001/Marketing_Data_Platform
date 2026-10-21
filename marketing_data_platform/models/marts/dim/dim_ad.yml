@@ -1,0 +1,40 @@
+version: 2
+models:
+  - name: dim_ad
+    description: >
+      One row per platform per ad, with its name, ad group and campaign. Rebuilt
+      in full on every run. Snapchat ads whose ad group is missing from the
+      source have a null campaign_key. None of them have performance data.
+    columns:
+      - name: ad_key
+        description: Surrogate key. Hash of platform and ad id. Primary key.
+        data_tests: [not_null, unique]
+      - name: platform
+        description: Advertising platform that owns the ad.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['facebook', 'snapchat']
+      - name: ad_id
+        description: Ad identifier in the source platform, as a string.
+        data_tests: [not_null]
+      - name: ad_name
+        description: Ad name as currently set in the platform.
+      - name: ad_status
+        description: Ad status (ACTIVE, PAUSED, ARCHIVED or DELETED). Facebook only, null for Snapchat.
+      - name: ad_group_id
+        description: Ad group (Facebook ad set) the ad belongs to.
+      - name: ad_group_name
+        description: Ad group name in its latest version. Null when the source has no matching ad group.
+      - name: campaign_id
+        description: Campaign the ad belongs to. Null when the ad group is missing.
+      - name: campaign_key
+        description: Foreign key to dim_campaign. Null when the campaign is unknown.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_campaign')
+                field: campaign_key
+              config:
+                severity: warn

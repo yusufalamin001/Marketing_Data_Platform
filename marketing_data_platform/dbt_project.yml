@@ -14,6 +14,11 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+vars:
+  # Days the incremental fact reloads on every run, so platform restatements
+  # overwrite the old rows. Tune it: longer is safer, shorter is cheaper.
+  lookback_days: 3
+
 models:
   marketing_data_platform:
     # Staging: one model per raw table, light cleaning only.
@@ -32,8 +37,16 @@ models:
       marketing:
         +materialized: view
 
-    # Marts: what analysts, BI tools and the AI agent query repeatedly.
-    # Stored as tables so queries are fast and do not recompute joins.
-    # The incremental fact model overrides this in its own file.
+    # Marts: what analysts, BI tools and the AI agent query.
     marts:
-      +materialized: table
+      # Facts grow daily. The strategy (merge) and unique key are set in the
+      # model itself because they are specific to that model.
+      fact:
+        +materialized: incremental
+      # Dimensions are small and rebuilt in full, so names are always current.
+      dim:
+        +materialized: table
+      # The consumption view stores nothing and joins on read, so it can
+      # never serve stale names.
+      reporting:
+        +materialized: view
