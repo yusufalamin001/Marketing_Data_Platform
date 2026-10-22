@@ -1,0 +1,64 @@
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main]
+
+# A new push to the same pull request cancels the older run.
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dbt-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: marketing_data_platform
+    env:
+      DBT_TARGET: ci
+      DEV_SCHEMA: pr_${{ github.event.pull_request.number }}
+      DBX_ID_APPLICATION_ID: ${{ secrets.DBX_ID_APPLICATION_ID }}
+      DBX_SECRET: ${{ secrets.DBX_SECRET }}
+      DBT_CONNECT_RETRIES: 5
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install locked dependencies
+        run: uv sync --frozen
+
+      - name: Install dbt packages
+        run: uv run dbt deps
+
+      - name: Check the connection
+        run: uv run dbt debug
+
+      - name: Build and test the whole project
+        run: >
+          uv run dbt build
+          --exclude "package:elementary" "test_name:schema_changes"
+          --fail-fast
+
+      - name: Drop the pull request schema
+        if: always()
+        continue-on-error: true
+        run: uv run dbt run-operation drop_ci_schema
+
+      - name: Keep run results for debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-run-results
+          path: marketing_data_platform/target/run_results.json
+          if-no-files-found: ignore
