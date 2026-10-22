@@ -1,15 +1,21 @@
-Welcome to your new dbt project!
+# dbt project
 
-### Using the starter project
+This folder holds the dbt project for the Marketing Data Platform. The architecture,
+decisions, setup steps and evidence are in the [main README](../README.md).
 
-Try running the following commands:
-- dbt run
-- dbt test
+## Layout
 
+| Folder | Contents |
+|---|---|
+| `models/staging` | One view per raw table, split by platform |
+| `models/intermediate` | Per-platform joins (ephemeral) and the unified union |
+| `models/marts` | `fact`, `dim` and `reporting` models |
+| `macros` | Catalog and schema routing, and the CI schema cleanup |
+| `tests/singular` | Spend reconciliation tests |
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+## Commands
+
+Run from this folder:
+
+    uv run --env-file ../.env dbt deps
+    uv run --env-file ../.env dbt build
