@@ -7,6 +7,7 @@ Test records for the claims made about the Marketing Data Platform.
 | `lineage/` | The lineage graph from the generated dbt docs |
 | `genie/` | An AI agent answering marketing questions from the model, checked against the raw data |
 | `elementary/` | Elementary observability catching a schema change |
+| `service_principal/` | The pipeline building under a service principal's identity, not a person's |
 
 ## Lineage
 
@@ -58,3 +59,29 @@ The full report is at `docs/elementary_report.html`.
 | `elementary/elementary_05_dashboard_after_revert.png` | Report after the model returned to its original columns |
 
 The demo column was added and removed in the dev schema only. It was never committed.
+
+## Service principal
+
+CI, staging and production authenticate as a Databricks service principal over OAuth, never a
+personal access token. To check that the pipeline builds under its own identity, a CI-target
+run created a test schema and the schema's owner was read back.
+
+| File | Contents |
+|---|---|
+| `service_principal/sp_01_schema_owner_summary.png` | `DESCRIBE SCHEMA EXTENDED` on the test schema created by the CI-target run |
+| `service_principal/sp_02_schema_owner_row.png` | The `Owner` row, showing the service principal's application ID and not a person |
+
+### How the check was run
+
+1. `dbt debug --target ci` connected as the service principal.
+2. `dbt build --target ci --select stg_facebook_ads_stats` created `ci_development.sp_test`
+   and built the model there. Seven of the eight project tests passed.
+3. The eighth, an Elementary schema change test, needs Elementary's tables and a fresh schema
+   has none. CI excludes those tests for that reason.
+4. `DESCRIBE SCHEMA EXTENDED` showed the service principal's application ID as the owner.
+5. The test schemas were dropped afterwards.
+
+### Result
+
+The pipeline authenticates, creates its own schemas, reads raw data and writes models under the
+service principal's identity. The grants it was given are in `infra/unity_catalog_grants.sql`.
