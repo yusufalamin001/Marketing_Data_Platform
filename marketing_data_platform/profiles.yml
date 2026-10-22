@@ -11,7 +11,9 @@ marketing_data_platform:
       client_id: "{{ env_var('DBX_ID_APPLICATION_ID') }}"
       client_secret: "{{ env_var('DBX_SECRET') }}"
       threads: 8
-      connect_retries: 30
+      # Retries when the warehouse is starting up. Defaults to 30. CI sets a low
+      # value through DBT_CONNECT_RETRIES so a broken secret fails fast.
+      connect_retries: "{{ env_var('DBT_CONNECT_RETRIES', 30) | as_number }}"
       retry_all: true
 
   outputs:
