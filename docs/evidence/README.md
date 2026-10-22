@@ -85,3 +85,23 @@ run created a test schema and the schema's owner was read back.
 
 The pipeline authenticates, creates its own schemas, reads raw data and writes models under the
 service principal's identity. The grants it was given are in `infra/unity_catalog_grants.sql`.
+
+## CI and deployment
+
+Every pull request into `main` is validated by a GitHub Actions workflow that authenticates as the
+service principal and builds the whole project into a throwaway schema. A merge to `main` deploys
+to staging, then to production after approval. Branch protection requires the `dbt-ci` check.
+
+| File | Contents |
+|---|---|
+| `ci/ci_01_branch_protection_rule.png` | Branch protection rule on `main` |
+| `ci/ci_02_required_check_pending.png` | A pull request with the required check still running, merge blocked |
+| `ci/ci_03_required_check_passed.png` | The same check passed, merge allowed |
+| `ci/ci_04_run_summary.png` | Build result and schema cleanup from the CI log |
+| `ci/deploy_01_staging_and_production_run.png` | The deployment run: staging, then production with approval |
+| `ci/deploy_02_production_tables.png` | The models built in `gold_production.analytics` |
+
+### Result
+
+The CI build on pull request 10 finished with 126 passed, 2 warnings and 0 errors, and dropped its
+own `pr_10` schemas afterwards. The warnings are the known data findings and not pipeline faults.
